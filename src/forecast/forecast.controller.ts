@@ -6,10 +6,11 @@ export class ForecastController {
   constructor(private readonly ForecastService: ForecastService) {}
 
   @Get()
-  getForecast(@Query('location') location: string): any {
-    let locationObject = this.ForecastService.getLatLong(location);
-
-    return locationObject;
+  async getForecast(@Query('location') location: string): Promise<any> {
+    let locationObject: any = await this.ForecastService.getLatLong(location);
+    let forecastObject = this.ForecastService.getForecast(locationObject);
+    
+    return forecastObject;
 
   }
 }
