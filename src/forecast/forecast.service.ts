@@ -5,7 +5,7 @@ export class ForecastService {
 
   constructor(private http: HttpService){}
 
-  async getLatLong(location: string): Promise<object>{
+  async getLatLong(location: string): Promise<any>{
     let nodeGeocoder = require('node-geocoder');
     let options = {
       provider: 'openstreetmap'
@@ -13,6 +13,11 @@ export class ForecastService {
  
     let geoCoder = nodeGeocoder(options);
     let response = await geoCoder.geocode(location)
+    console.log(response)
+    if(response == ''){
+      console.log('I am null')
+      return ''
+    }
     let locationObject = (({latitude,longitude,formattedAddress}) => ({latitude,longitude,formattedAddress}))(response[0])
     return locationObject;
   }
