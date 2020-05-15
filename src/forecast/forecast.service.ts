@@ -21,18 +21,20 @@ export class ForecastService {
     let latitude = locationObject.latitude
     let longitude = locationObject.longitude
     let address = locationObject.formattedAddress
-    console.log(address)
+
     const response = await this.http.get('http://www.7timer.info/bin/api.pl?lon='+longitude+'&lat='+latitude+'&product=astro&output=json').toPromise();
     const geoTz = require('geo-tz')
+    var moment = require('moment-timezone');
 
     const timeZone = geoTz(latitude,longitude)
+
     const dayOneData = (response.data['dataseries']).slice(6,10)
     const dayTwoData = (response.data['dataseries']).slice(14,18)
     const dayThreeData = (response.data['dataseries']).slice(22,26)
 
-    var today = new Date();
-    var tomorrow = new Date(new Date().setDate(today.getDate() + 1));
-    var dayAfter = new Date(new Date().setDate(today.getDate() + 2));
+    var today = moment().tz(timeZone[0]);
+    var tomorrow = moment().tz(timeZone[0]).add(1, 'days');
+    var dayAfter = moment().tz(timeZone[0]).add(2, 'days');
 
     var forecastToday = this.constructForecastObject(address,today,timeZone[0],dayOneData,latitude,longitude)
     var forecastTomorrow = this.constructForecastObject(address,tomorrow,timeZone[0],dayTwoData,latitude,longitude)
@@ -65,22 +67,24 @@ export class ForecastService {
 
   constructForecastObject(addr,date,tz,dayData,lat: number,long: number){
     var SunCalc = require('suncalc');
+    var moment = require('moment-timezone');
 
     const moonPhaseData = SunCalc.getMoonIllumination(date)
-    const moonTimesData = SunCalc.getMoonTimes(date,lat,long)
+    const moonTimesData = SunCalc.getMoonTimes(date,lat,long,'inUTC')
 
     let cloudcover = this.calcAverage(dayData,'cloudcover');
-    console.log(this.getMetric(cloudcover))
     return {
       address: addr,
-      date: date.toLocaleString('en-US', { timeZone: tz }),
+      date: date.format("MMM Do YYYY"),
       metric: this.getMetric(cloudcover),
       cloudcover: cloudcover,
       seeing: this.calcAverage(dayData,'seeing'),
       transparency: this.calcAverage(dayData,'transparency'),
       moonIllumination: (moonPhaseData.fraction).toFixed(2),
-      moonRiseTime: (moonTimesData.rise).toLocaleString('en-US', { timeZone: tz }),
-      moonSetTime: (moonTimesData.set).toLocaleString('en-US', { timeZone: tz })
+      //moonRiseTime: (moonTimesData.rise),
+      //moonSetTime: (moonTimesData.set)
+      moonRiseTime: moment(moonTimesData.rise).tz(tz).format('MMMM Do YYYY, h:mm:ss a'),
+      moonSetTime: moment(moonTimesData.set).tz(tz).format('MMMM Do YYYY, h:mm:ss a')
     }
   }
 
