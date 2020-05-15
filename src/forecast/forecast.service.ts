@@ -13,9 +13,7 @@ export class ForecastService {
  
     let geoCoder = nodeGeocoder(options);
     let response = await geoCoder.geocode(location)
-    console.log(response)
     if(response == ''){
-      console.log('I am null')
       return ''
     }
     let locationObject = (({latitude,longitude,formattedAddress}) => ({latitude,longitude,formattedAddress}))(response[0])
