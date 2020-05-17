@@ -16,6 +16,7 @@ export class ForecastService {
     if(response == ''){
       return ''
     }
+
     let locationObject = (({latitude,longitude,formattedAddress}) => ({latitude,longitude,formattedAddress}))(response[0])
     return locationObject;
   }
@@ -51,20 +52,26 @@ export class ForecastService {
     return (data.reduce((sum,data) => sum + data[property],0))/(data.length)
   }
 
+  returnCloudCover(data:any): any{
+
+    return data.map(cc => (((cc['cloudcover']-1)/8)*100).toFixed(0));
+
+  }
+
   getMetric(cloudcover): string{
     if(cloudcover <= 2){
-      return 'great!'
+      return 'Tonight is a great day to watch/shoot the stars!'
     }
     else if (cloudcover > 2 && cloudcover <= 5){
-      return 'good'
+      return 'Tonight is a good day to watch/shoot the stars!'
     }
 
     else if (cloudcover > 5 && cloudcover <= 7){
-      return 'bad'
+      return 'Tonight is a bad day to watch/shoot the stars'
     }
 
     else if (cloudcover > 7 && cloudcover <= 9){
-      return 'nope'
+      return 'There is very little chance of watching/shooting the stars tonight'
     }
   }
 
@@ -74,18 +81,16 @@ export class ForecastService {
 
     const moonPhaseData = SunCalc.getMoonIllumination(date)
     const moonTimesData = SunCalc.getMoonTimes(date,lat,long,'inUTC')
-
     let cloudcover = this.calcAverage(dayData,'cloudcover');
     return {
       address: addr,
+      day: date.format("dddd"),
       date: date.format("MMM Do YYYY"),
       metric: this.getMetric(cloudcover),
-      cloudcover: cloudcover,
-      seeing: this.calcAverage(dayData,'seeing'),
-      transparency: this.calcAverage(dayData,'transparency'),
-      moonIllumination: (moonPhaseData.fraction).toFixed(2),
-      //moonRiseTime: (moonTimesData.rise),
-      //moonSetTime: (moonTimesData.set)
+      cloudcover: this.returnCloudCover(dayData),
+      seeing: (((8-(this.calcAverage(dayData,'seeing')))/8)*100).toFixed(0),
+      transparency: (((8-(this.calcAverage(dayData,'transparency')))/8)*100).toFixed(0),
+      moonIllumination: ((moonPhaseData.fraction)*100).toFixed(0),
       moonRiseTime: moment(moonTimesData.rise).tz(tz).format('MMMM Do YYYY, h:mm:ss a'),
       moonSetTime: moment(moonTimesData.set).tz(tz).format('MMMM Do YYYY, h:mm:ss a')
     }
