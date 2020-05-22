@@ -60,14 +60,14 @@ export class ForecastService {
 
   getMetric(cloudcover): string{
     if(cloudcover <= 2){
-      return 'Tonight is a great day to watch/shoot the stars!'
+      return 'Tonight is great to watch/shoot the stars!'
     }
     else if (cloudcover > 2 && cloudcover <= 5){
-      return 'Tonight is a good day to watch/shoot the stars!'
+      return 'Tonight is good to watch/shoot the stars!'
     }
 
     else if (cloudcover > 5 && cloudcover <= 7){
-      return 'Tonight is a bad day to watch/shoot the stars'
+      return 'Tonight is bad to watch/shoot the stars'
     }
 
     else if (cloudcover > 7 && cloudcover <= 9){
