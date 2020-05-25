@@ -4,6 +4,14 @@ const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const options = {
+        "origin": "*",
+        "methods": "GET",
+        "preflightContinue": false,
+        "optionsSuccessStatus": 204,
+        "credentials": true
+    };
+    app.enableCors(options);
     await app.listen(3000);
 }
 bootstrap();
