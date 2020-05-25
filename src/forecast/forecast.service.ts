@@ -1,100 +1,98 @@
-import { Injectable, HttpService } from '@nestjs/common';
+import { Injectable, HttpService,HttpException,HttpStatus } from '@nestjs/common';
 
 @Injectable()
 export class ForecastService {
 
   constructor(private http: HttpService){}
 
-  async getLatLong(location: string): Promise<any>{
+  async getLatLong(location?: string, lat?: number, lon?: number): Promise<any>{
     let nodeGeocoder = require('node-geocoder');
     let options = {
       provider: 'openstreetmap'
     };
- 
     let geoCoder = nodeGeocoder(options);
-    let response = await geoCoder.geocode(location)
-    if(response == ''){
-      return ''
+    if(lat && lon){
+      try{
+        let response = await geoCoder.reverse({lat: lat, lon: lon})
+        return (({latitude,longitude,formattedAddress}) => ({latitude,longitude,formattedAddress}))(response[0])
+      }catch{
+        throw new HttpException('Ivalid lat lon coordinates', HttpStatus.BAD_REQUEST);
+      }
     }
-
-    let locationObject = (({latitude,longitude,formattedAddress}) => ({latitude,longitude,formattedAddress}))(response[0])
-    return locationObject;
+      else if(location){
+        try{
+          let response = await geoCoder.geocode(location)
+          return (({latitude,longitude,formattedAddress}) => ({latitude,longitude,formattedAddress}))(response[0])
+        }catch{
+          throw new HttpException('Ivalid location', HttpStatus.BAD_REQUEST);
+        }
+    }
+  
   }
 
   async getForecast(locationObject): Promise<any>{
+
+    const axios = require('axios');
+
     let latitude = locationObject.latitude
     let longitude = locationObject.longitude
     let address = locationObject.formattedAddress
 
-    const response = await this.http.get('http://www.7timer.info/bin/api.pl?lon='+longitude+'&lat='+latitude+'&product=astro&output=json').toPromise();
-    const geoTz = require('geo-tz')
-    var moment = require('moment-timezone');
+    let appKey = process.env.APP_KEY;
+    let appID = process.env.APP_ID;
 
-    const timeZone = geoTz(latitude,longitude)
+    console.log(appID,appKey)
+    try{
+    const response = await axios.get('http://api.weatherunlocked.com/api/forecast/'+latitude+','+longitude, {
+      params: {
+      app_id: appID,
+      app_key: appKey
+      } 
+    })
+      let temp = await this.extractData(response.data['Days'])
+      return {
+        address: address,
+        forecast: temp
+      };
 
-    const dayOneData = (response.data['dataseries']).slice(6,10)
-    const dayTwoData = (response.data['dataseries']).slice(14,18)
-    const dayThreeData = (response.data['dataseries']).slice(22,26)
-
-    var today = moment().tz(timeZone[0]);
-    var tomorrow = moment().tz(timeZone[0]).add(1, 'days');
-    var dayAfter = moment().tz(timeZone[0]).add(2, 'days');
-
-    var forecastToday = this.constructForecastObject(address,today,timeZone[0],dayOneData,latitude,longitude)
-    var forecastTomorrow = this.constructForecastObject(address,tomorrow,timeZone[0],dayTwoData,latitude,longitude)
-    var forecastDayAfter = this.constructForecastObject(address,dayAfter,timeZone[0],dayThreeData,latitude,longitude)
-
-    return [forecastToday,forecastTomorrow,forecastDayAfter]
-  }
-
-  calcAverage(data: any, property: string): any{
-    //Calculates the average of the given property
-    return (data.reduce((sum,data) => sum + data[property],0))/(data.length)
-  }
-
-  returnCloudCover(data:any): any{
-
-    return data.map(cc => (((cc['cloudcover']-1)/8)*100).toFixed(0));
+    }catch (error) {
+      throw new HttpException('Missing API keys or weatherunlocked is down', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
   }
 
-  getMetric(cloudcover): string{
-    if(cloudcover <= 2){
-      return 'Tonight is great to watch/shoot the stars!'
-    }
-    else if (cloudcover > 2 && cloudcover <= 5){
-      return 'Tonight is good to watch/shoot the stars!'
-    }
+  async extractData(response){
+    let forecast = await response.map(async (val) => {
+    var moment = require('moment')
 
-    else if (cloudcover > 5 && cloudcover <= 7){
-      return 'Tonight is bad to watch/shoot the stars'
-    }
+      let cloudcover = await (val.Timeframes).map((val) => {
+        return {
+        time: val.time,
+        cover: val.cloudtotal_pct
+        }
+      })
 
-    else if (cloudcover > 7 && cloudcover <= 9){
-      return 'There is very little chance of watching/shooting the stars tonight'
-    }
+      return {
+        date: moment(val.date,'D/M/YYYY'),
+        sunrise: val.sunrise_time,
+        sunset: val.sunrise_time,
+        moonrise: val.moonrise_time,
+        moonset: val.moonset_time,
+        moonillumination: await this.getMoonIllumination(val.date),
+        cloudcover: cloudcover
+      }
+    });
+    return Promise.all(forecast)
   }
 
-  constructForecastObject(addr,date,tz,dayData,lat: number,long: number){
+  async getMoonIllumination(date){
+
     var SunCalc = require('suncalc');
-    var moment = require('moment-timezone');
+    var moment = require('moment')
+    var unixTimestamp = moment(date, 'D/M/YYYY').valueOf();
 
-    const moonPhaseData = SunCalc.getMoonIllumination(date)
-    const moonTimesData = SunCalc.getMoonTimes(date,lat,long,'inUTC')
-    let cloudcover = this.calcAverage(dayData,'cloudcover');
-    return {
-      address: addr,
-      day: date.format("dddd"),
-      date: date.format("MMM Do YYYY"),
-      metric: this.getMetric(cloudcover),
-      cloudcover: this.returnCloudCover(dayData),
-      seeing: (((8-(this.calcAverage(dayData,'seeing')))/8)*100).toFixed(0),
-      transparency: (((8-(this.calcAverage(dayData,'transparency')))/8)*100).toFixed(0),
-      moonIllumination: ((moonPhaseData.fraction)*100).toFixed(0),
-      moonRiseTime: moment(moonTimesData.rise).tz(tz).format('MMMM Do YYYY, h:mm:ss a'),
-      moonSetTime: moment(moonTimesData.set).tz(tz).format('MMMM Do YYYY, h:mm:ss a')
-    }
+    let fraction = await (SunCalc.getMoonIllumination(unixTimestamp)).fraction
+
+    return (fraction*100).toFixed(0)
   }
-
-
 }
