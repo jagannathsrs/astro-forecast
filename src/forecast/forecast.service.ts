@@ -41,7 +41,6 @@ export class ForecastService {
     let appKey = process.env.APP_KEY;
     let appID = process.env.APP_ID;
 
-    console.log(appID,appKey)
     try{
     const response = await axios.get('http://api.weatherunlocked.com/api/forecast/'+latitude+','+longitude, {
       params: {

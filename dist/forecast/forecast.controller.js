@@ -12,36 +12,38 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ForecastController = void 0;
 const common_1 = require("@nestjs/common");
 const forecast_service_1 = require("./forecast.service");
-let ForecastController = class ForecastController {
-    constructor(ForecastService) {
-        this.ForecastService = ForecastService;
-    }
-    async getForecast(location, lat, lon) {
-        if (!location && (!lat || !lon)) {
-            throw new common_1.HttpException('Location or lat and lon required', common_1.HttpStatus.BAD_REQUEST);
+let ForecastController = (() => {
+    let ForecastController = class ForecastController {
+        constructor(ForecastService) {
+            this.ForecastService = ForecastService;
         }
-        console.log(location);
-        let locationObject = await this.ForecastService.getLatLong(location, lat, lon);
-        console.log(locationObject);
-        if (locationObject == '') {
-            throw new common_1.HttpException('Ivalid location name', common_1.HttpStatus.BAD_REQUEST);
+        async getForecast(location, lat, lon) {
+            if (!location && (!lat || !lon)) {
+                throw new common_1.HttpException('Location or lat and lon required', common_1.HttpStatus.BAD_REQUEST);
+            }
+            let locationObject = await this.ForecastService.getLatLong(location, lat, lon);
+            if (locationObject == '') {
+                throw new common_1.HttpException('Ivalid location name', common_1.HttpStatus.BAD_REQUEST);
+            }
+            let forecastObject = this.ForecastService.getForecast(locationObject);
+            return forecastObject;
         }
-        let forecastObject = this.ForecastService.getForecast(locationObject);
-        return forecastObject;
-    }
-};
-__decorate([
-    common_1.Get(),
-    __param(0, common_1.Query('location')), __param(1, common_1.Query('lat')), __param(2, common_1.Query('lon')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Number, Number]),
-    __metadata("design:returntype", Promise)
-], ForecastController.prototype, "getForecast", null);
-ForecastController = __decorate([
-    common_1.Controller('forecast'),
-    __metadata("design:paramtypes", [forecast_service_1.ForecastService])
-], ForecastController);
+    };
+    __decorate([
+        common_1.Get(),
+        __param(0, common_1.Query('location')), __param(1, common_1.Query('lat')), __param(2, common_1.Query('lon')),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", [String, Number, Number]),
+        __metadata("design:returntype", Promise)
+    ], ForecastController.prototype, "getForecast", null);
+    ForecastController = __decorate([
+        common_1.Controller('forecast'),
+        __metadata("design:paramtypes", [forecast_service_1.ForecastService])
+    ], ForecastController);
+    return ForecastController;
+})();
 exports.ForecastController = ForecastController;
 //# sourceMappingURL=forecast.controller.js.map

@@ -11,9 +11,8 @@ export class ForecastController {
     if(!location && (!lat || !lon)){
       throw new HttpException('Location or lat and lon required', HttpStatus.BAD_REQUEST);
     }
-    console.log(location)
+    
     let locationObject: any = await this.ForecastService.getLatLong(location,lat,lon);
-    console.log(locationObject)
     
     if(locationObject == ''){
       throw new HttpException('Ivalid location name', HttpStatus.BAD_REQUEST);

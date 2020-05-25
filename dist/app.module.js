@@ -6,22 +6,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ForecastModule = void 0;
+exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
-const forecast_controller_1 = require("./forecast.controller");
-const forecast_service_1 = require("./forecast.service");
-const config_1 = require("@nestjs/config");
-let ForecastModule = (() => {
-    let ForecastModule = class ForecastModule {
+const app_controller_1 = require("./app.controller");
+const app_service_1 = require("./app.service");
+const forecast_module_1 = require("./forecast/forecast.module");
+let AppModule = (() => {
+    let AppModule = class AppModule {
     };
-    ForecastModule = __decorate([
+    AppModule = __decorate([
         common_1.Module({
-            imports: [common_1.HttpModule, config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: 'config.env', })],
-            controllers: [forecast_controller_1.ForecastController],
-            providers: [forecast_service_1.ForecastService],
+            imports: [forecast_module_1.ForecastModule],
+            controllers: [app_controller_1.AppController],
+            providers: [app_service_1.AppService],
         })
-    ], ForecastModule);
-    return ForecastModule;
+    ], AppModule);
+    return AppModule;
 })();
-exports.ForecastModule = ForecastModule;
-//# sourceMappingURL=forecast.module.js.map
+exports.AppModule = AppModule;
+//# sourceMappingURL=app.module.js.map
