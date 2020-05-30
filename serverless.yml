@@ -1,29 +1,30 @@
-service:
-  name: serverless-astro
-
-plugins:
-  - '@hewmen/serverless-plugin-typescript'  
-  - serverless-plugin-optimize
-  - serverless-offline
-  # - serverless-plugin-warmup
-
-# custom:
-#   # Enable warmup on all functions (only for production and staging)
-#   warmup:      
-#       - production
-#       - staging
+service: serverless-nestjs
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs8.10
+
+plugins:
+  - serverless-offline
 
 package:
-  individually: true
+  exclude:
+    - .git/**
+    - src/**
+    - test/**
+    - e2e/**
+    - nodemon.json
+    - README.md
 
 functions:
-  main:
-    handler: src/main.handler
+  index:
+    handler: dist/index.handler
     events:
-      - http:
-          method: any
-          path: /{proxy+}
+    - http:
+        cors: true
+        path: '/'
+        method: any
+    - http:
+        cors: true
+        path: '{proxy+}'
+        method: any
