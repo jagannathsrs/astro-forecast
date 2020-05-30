@@ -74,7 +74,7 @@ export class AppService {
 
       let cloudcover = await (val.Timeframes).map((val) => {
         return {
-        time: val.time,
+        time: this.formatTime(val.time),
         cover: val.cloudtotal_pct
         }
       })
@@ -101,5 +101,16 @@ export class AppService {
     let fraction = await (SunCalc.getMoonIllumination(unixTimestamp)).fraction
 
     return (fraction*100).toFixed(0)
+  }
+  async formatTime(time){
+    var moment = require('moment')
+
+    if((String(time)).length === 3){
+      return moment.utc(time,'hmm').format('HH:mm')
+    }
+    else{
+      return moment.utc(time,'hhmm').format('HH:mm')
+
+    }
   }
 }
