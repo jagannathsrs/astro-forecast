@@ -77,7 +77,7 @@ export class AppService {
       })
 
       return {
-        date: moment(val.date,'D/M/YYYY'),
+        date: moment(val.date,'D/M/YYYY').format('dddd, MMMM Do'),
         sunrise: val.sunrise_time,
         sunset: val.sunrise_time,
         moonrise: val.moonrise_time,
