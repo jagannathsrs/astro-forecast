@@ -6,18 +6,14 @@ export class AppService {
   constructor(private http: HttpService){}
 
   async getLatLong(location?: string, lat?: number, lon?: number): Promise<any>{
-    console.log('hello I am here' + location)
     try{
       let nodeGeocoder = require('node-geocoder');
       let options = {
       provider: 'openstreetmap'
       };
       var geoCoder = nodeGeocoder(options);
-      console.log('in geo try block' + geoCoder)
     }catch(err){
-      console.log('that is this is error' + err)
     }
-    console.log('get geocoder done')
     if(lat && lon){
       try{
         let response = await geoCoder.reverse({lat: lat, lon: lon})
@@ -29,7 +25,6 @@ export class AppService {
       else if(location){
         try{
           let response = await geoCoder.geocode(location)
-          console.log('this is location response' +response)
           return (({latitude,longitude,formattedAddress}) => ({latitude,longitude,formattedAddress}))(response[0])
         }catch{
           throw new HttpException('Ivalid location', HttpStatus.BAD_REQUEST);
@@ -59,6 +54,8 @@ export class AppService {
       let temp = await this.extractData(response.data['Days'])
       return {
         address: address,
+        lat: latitude,
+        lon: longitude,
         forecast: temp
       };
 
@@ -70,9 +67,9 @@ export class AppService {
 
   async extractData(response){
     let forecast = await response.map(async (val) => {
-    var moment = require('moment')
+    let moment = require('moment')
 
-      let cloudcover = await (val.Timeframes).map((val) => {
+      let cloudcover =  (val.Timeframes).map( (val) => {
         return {
         time: this.formatTime(val.time),
         cover: val.cloudtotal_pct
@@ -102,8 +99,8 @@ export class AppService {
 
     return (fraction*100).toFixed(0)
   }
-  async formatTime(time){
-    var moment = require('moment')
+  formatTime(time){
+    const moment = require('moment')
 
     if((String(time)).length === 3){
       return moment.utc(time,'hmm').format('HH:mm')
