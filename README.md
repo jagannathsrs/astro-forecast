@@ -1,10 +1,9 @@
 # Astro-forecast backend
 This is the backend for the astro-forecast website(https://jagannathsrs.github.io/astro). It uses nestJS framework and is deployed on an AWS Lambda using the serverless plugin.
+## Architecture
 
-### change
-- `package.json`
+![Architecture](https://github.com/jagannathsrs/astro-forecast/blob/master/astro-archi.png)
 
-## How to use
 ### Prepare
 
 ```
