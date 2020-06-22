@@ -1,13 +1,5 @@
-# serverless-nestjs
-This is an example of creating a function that runs as nestjs using the serverless framework. 
-Sample publish. https://mmjdx4zxmc.execute-api.ap-northeast-1.amazonaws.com/dev/
-
-## What is changed.
-
-### add
-- `src/index.ts`
-- `src/swagger.ts`
-- `serverless.yml`
+# Astro-forecast backend
+This is the backend for the astro-forecast website(https://jagannathsrs.github.io/astro). It uses nestJS framework and is deployed on an AWS Lambda using the serverless plugin.
 
 ### change
 - `package.json`
@@ -16,9 +8,8 @@ Sample publish. https://mmjdx4zxmc.execute-api.ap-northeast-1.amazonaws.com/dev/
 ### Prepare
 
 ```
-$ npm install @nestjs/cli serverless -g
-$ git clone git@github.com:rdlabo/serverless-nestjs.git 【projectName】
-$ cd 【projectName】
+$ Clone this repository
+$ cd astro-forecast
 $ npm install
 $ npm start
 ```
