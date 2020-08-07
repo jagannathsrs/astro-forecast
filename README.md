@@ -4,6 +4,58 @@ This is the backend for the astro-forecast website(https://jagannathsrs.github.i
 
 ![Architecture](https://github.com/jagannathsrs/astro-forecast/blob/master/astro-archi.png)
 
+## API Documentation
+
+### Get Forecast
+
+Get a 7 day forecast of cloud cover of a given latitude and longitude.
+
+**URL** : `/prod?lat=<latitude>&lon=<longitude>`
+
+**Method** : `GET`
+
+**Auth required** : NO
+
+**Permissions required** : None
+
+## Success Response
+
+**Code** : `200 OK`
+
+**Example**
+latitute = 40.4281443
+Longitude = -79.9304523
+
+Response:
+```
+{
+    "address": "3819, Beechwood Boulevard, Greenfield, Pittsburgh, Allegheny County, Pennsylvania, 15217, United States of America",
+    "lat": 40.42821665281832,
+    "lon": -79.9304373791576,
+    "forecast": [
+        {
+            "date": "Thursday, August 6th",
+            "sunrise": "06:23",
+            "sunset": "06:23",
+            "moonrise": "22:28",
+            "moonset": "09:08",
+            "moonillumination": "94",
+            "cloudcover": [
+                {
+                    "time": "19:00",
+                    "cover": 26
+                },
+                {
+                    "time": "22:00",
+                    "cover": 13
+                }
+            ]
+        },
+......
+    ]
+}
+```
+
 ### Prepare
 
 ```
@@ -57,48 +109,6 @@ Then browse http://localhost:3000
 ## How to Deploy
 ```bash
 $ npm run prestart:prod && sls deploy
-```
-
-## Options
-### Hot start
-See : https://serverless.com/blog/keep-your-lambdas-warm/
-
-These behavior can be fixed with the plugin serverless-plugin-warmup
-
-1 Install the plugin
-
-```
-$ npm install serverless-plugin-warmup --save-dev
-```
-
-2 Enable the plugin
-
-```
-plugins:
-  - '@hewmen/serverless-plugin-typescript'
-  - serverless-plugin-optimize
-  - serverless-offline
-  - serverless-plugin-warmup
-
-custom:
-  # Enable warmup on all functions (only for production and staging)
-  warmup:      
-      - production
-      - staging
-```
-
-### Use Swagger for development
-
-```
-$ npx ts-node src/swagger.ts
-```
-
-```
-[Nest] 6890   - 2019-03-24 15:11   [NestFactory] Starting Nest application...
-[Nest] 6890   - 2019-03-24 15:11   [InstanceLoader] AppModule dependencies initialized +11ms
-[Nest] 6890   - 2019-03-24 15:11   [RoutesResolver] AppController {/}: +224ms
-[Nest] 6890   - 2019-03-24 15:11   [RouterExplorer] Mapped {/, GET} route +2ms
-[Nest] 6890   - 2019-03-24 15:11   [NestApplication] Nest application successfully started +2ms
 ```
 
 Then browse http://localhost:3001/api
